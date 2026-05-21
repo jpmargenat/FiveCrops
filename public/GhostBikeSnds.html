@@ -1456,7 +1456,7 @@ document.getElementById('canvas-wrap').addEventListener('click',function(e){
   if(!trackData||trackData.length<2)return;
   var rect=cv.getBoundingClientRect();
   var name=prompt('PDI name:','')||'PDI '+(pdiList.length+1);
-  pdiList.push({nx:(e.clientX-rect.left)/rect.width,ny:(e.clientY-rect.top)/rect.height,name:name,triggered:false});
+  pdiList.push({nx:(e.clientX-rect.left)/rect.width,ny:(e.clientY-rect.top)/rect.height,name:name,triggered:false,radius:0.03});
   renderPDIs();
 });
 function renderPDIs(){
@@ -1493,6 +1493,24 @@ function renderPDIs(){
     el.appendChild(fileInput);
     el.appendChild(sBtn);
 
+    // radio slider
+    var rWrap=document.createElement('div');
+    rWrap.style.cssText='display:flex;align-items:center;gap:4px;margin-left:4px;';
+    var rLabel=document.createElement('span');
+    rLabel.style.cssText='font-size:0.7vh;color:rgba(255,255,255,0.4);white-space:nowrap;';
+    rLabel.textContent='r:'+((p.radius||0.03)*100).toFixed(1);
+    var rSlider=document.createElement('input');
+    rSlider.type='range';rSlider.min=0.005;rSlider.max=0.15;rSlider.step=0.001;
+    rSlider.value=p.radius||0.03;
+    rSlider.style.cssText='width:50px;accent-color:rgba(255,255,255,0.6);cursor:pointer;';
+    (function(pi,lbl){
+      rSlider.addEventListener('input',function(){
+        pdiList[pi].radius=parseFloat(this.value);
+        lbl.textContent='r:'+(pdiList[pi].radius*100).toFixed(1);
+      });
+    })(i,rLabel);
+    rWrap.appendChild(rLabel);rWrap.appendChild(rSlider);el.appendChild(rWrap);
+
     // borrar
     var del=document.createElement('div');del.className='pdi-del';del.textContent='✕';
     del.addEventListener('click',function(){pdiList.splice(i,1);renderPDIs();});
@@ -1503,7 +1521,7 @@ function renderPDIs(){
 }
 function drawPDIs(S){
   // radio de afectacion: 0.03 en espacio normalizado = ~50m segun escala del canvas
-  var bufferR=S*0.03;
+  // bufferR calculado por PDI
   var crossSize=S*0.008; // tamaño de la cruz
 
   pdiList.forEach(function(p){
@@ -1513,6 +1531,7 @@ function drawPDIs(S){
     // círculo de puntos — buffer de afectación
     ctx.beginPath();
     ctx.setLineDash([S*0.004, S*0.004]);
+    var bufferR=S*(p.radius||0.03);
     ctx.arc(px,py,bufferR,0,Math.PI*2);
     ctx.strokeStyle='rgba(255,255,255,0.2)';
     ctx.lineWidth=0.8;
@@ -1545,7 +1564,7 @@ function checkPDIs(pt){
   if(!AC)return;
   pdiList.forEach(function(p){
     var dx=p.nx-pt.nx,dy=p.ny-pt.ny;
-    if(Math.sqrt(dx*dx+dy*dy)<0.03&&!p.triggered){
+    if(Math.sqrt(dx*dx+dy*dy)<(p.radius||0.03)&&!p.triggered){
       p.triggered=true;
 
       // decodificar sample pendiente si el AC no estaba listo antes
@@ -1760,10 +1779,11 @@ function loop(ts){
           var vol2=(P.oscVol*0.3)/Math.sqrt(Math.max(1,allTracks.length));
           polyGains[ti_].gain.setTargetAtTime(vol2,AC.currentTime,0.1);
         }
+        checkPDIs(pt2);
         if(ti_===0){
           gpsCount++;if(gpsCount%divGPS===0)triggerClick();
           cadCount++;if(pt2.cadence>15&&cadCount%divCad===0)triggerKick(pt2.cadence);
-          window.polyCurrentTrack=ti_;checkRandomTrigger(pt2);checkPDIs(pt2);
+          window.polyCurrentTrack=ti_;checkRandomTrigger(pt2);
           if(frameCount%2===0){
             document.getElementById('d-ele').textContent=Math.round(pt2.ele)+'m';
             document.getElementById('d-hr').textContent=pt2.hr+' bpm';
