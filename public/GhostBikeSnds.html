@@ -1160,49 +1160,59 @@ function triggerKick(cad){
 }
 
 // ══ VIENTO PARTÍCULAS ═════════════════════════════════════════════════════
-var wParts=[];
-var WP_MAX=200;
-function spawnWP(){
-  if(wParts.length>=WP_MAX)return;
-  var rad=((windDir+180)%360)*Math.PI/180;
-  var vx0=Math.sin(rad),vy0=-Math.cos(rad);
-  var fromRad=windDir*Math.PI/180;
-  var fx=Math.sin(fromRad),fy=-Math.cos(fromRad);
-  var x,y;
-  if(Math.abs(fx)>Math.abs(fy)){x=fx>0?-0.02:1.02;y=Math.random();}
-  else{x=Math.random();y=fy>0?-0.02:1.02;}
-  wParts.push({x,y,ax:vx0,ay:vy0,life:1,decay:0.006+Math.random()*0.006,len:0.04+windSpd*0.008,alpha:0.5+Math.random()*0.4,no:Math.random()*200});
+// versión cartografia_ride: canvas propio, 90 partículas, línea+dot, gris
+var wcanvas=document.createElement('canvas');
+wcanvas.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;';
+document.getElementById('canvas-wrap').appendChild(wcanvas);
+var wctx=wcanvas.getContext('2d');
+
+function resizeWC(){
+  var cw=document.getElementById('canvas-wrap');
+  wcanvas.width=cw.clientWidth||600;
+  wcanvas.height=cw.clientHeight||600;
 }
-function updateWindParticles(ts){
-  wParts=wParts.filter(function(p){return p.life>0;});
-  var tc=ts*0.00004,spd=0.004+windSpd*0.001;
-  for(var i=0;i<wParts.length;i++){
-    var p=wParts[i];
-    var nx2=Math.sin(p.x*6+p.no+tc)*0.0003;
-    var ny2=Math.cos(p.y*6+p.no+tc)*0.0003;
-    p.x+=p.ax*spd+nx2;p.y+=p.ay*spd+ny2;p.life-=p.decay;
-    if(p.x<-0.05||p.x>1.05||p.y<-0.05||p.y>1.05)p.life=0;
-  }
-  if(Math.random()<0.6)spawnWP();if(Math.random()<0.3)spawnWP();
+setTimeout(resizeWC,100);
+setTimeout(resizeWC,600);
+window.addEventListener('resize',resizeWC);
+
+var PARTS=[];
+for(var _i=0;_i<90;_i++) PARTS.push({x:Math.random()*600,y:Math.random()*500,life:Math.random(),maxLife:0.5+Math.random()*0.5,spd:0.5+Math.random()*0.8});
+
+function animParts(){
+  wctx.clearRect(0,0,wcanvas.width,wcanvas.height);
+  var ws=Math.max(windSpd,1.5);
+  var windDirRad2=windDir*Math.PI/180;
+  var vx=Math.sin(windDirRad2)*ws*1.2;
+  var vy=Math.cos(windDirRad2)*ws*1.2;
+  PARTS.forEach(function(p){
+    p.x+=vx*p.spd; p.y+=vy*p.spd; p.life+=0.006;
+    var t=p.life/p.maxLife;
+    var a=t<0.2?t/0.2:t>0.75?(1-t)/0.25:1;
+    var len=Math.max(ws*p.spd*4,8);
+    wctx.beginPath();
+    wctx.moveTo(p.x,p.y);
+    wctx.lineTo(p.x-Math.sin(windDirRad2)*len, p.y-Math.cos(windDirRad2)*len);
+    wctx.strokeStyle='rgba(160,160,160,'+(a*0.5)+')';
+    wctx.lineWidth=1; wctx.lineCap='round'; wctx.stroke();
+    wctx.beginPath();
+    wctx.arc(p.x,p.y,1,0,Math.PI*2);
+    wctx.fillStyle='rgba(160,160,160,'+(a*0.5)+')';
+    wctx.fill();
+    if(p.life>p.maxLife||p.x<-80||p.x>wcanvas.width+80||p.y<-80||p.y>wcanvas.height+80){
+      var fl=Math.sin(windDirRad2)>0;
+      var ft=Math.cos(windDirRad2)>0;
+      if(Math.random()>0.5){p.x=fl?-10:wcanvas.width+10;p.y=Math.random()*wcanvas.height;}
+      else{p.y=ft?-10:wcanvas.height+10;p.x=Math.random()*wcanvas.width;}
+      p.life=0; p.maxLife=0.5+Math.random()*0.5; p.spd=0.5+Math.random()*0.8;
+    }
+  });
+  requestAnimationFrame(animParts);
 }
-function drawWindParticles(S){
-  var W=cv.width, H=cv.height;
-  var baseLen=Math.min(W,H)*0.06*(1+windSpd*0.15);
-  for(var i=0;i<wParts.length;i++){
-    var p=wParts[i];
-    var px=p.x*W, py=p.y*H;
-    if(px<-10||px>W+10||py<-10||py>H+10)continue;
-    var dx=p.ax*baseLen, dy=p.ay*baseLen;
-    ctx.save();
-    ctx.globalAlpha=p.life*p.alpha*0.45;
-    ctx.strokeStyle='rgba(120,190,255,1)';ctx.lineWidth=4;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(px-dx,py-dy);ctx.lineTo(px,py);ctx.stroke();
-    ctx.globalAlpha=p.life*p.alpha;
-    ctx.strokeStyle='rgba(220,240,255,1)';ctx.lineWidth=1.8;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(px-dx,py-dy);ctx.lineTo(px,py);ctx.stroke();
-    ctx.restore();
-  }
-}
+animParts();
+
+// stubs para compatibilidad con el loop principal
+function updateWindParticles(ts){}
+function drawWindParticles(S){}
 
 // ══ GPX MULTI-TRACK ═══════════════════════════════════════════════════════
 function parseTrkpts(tpts){
@@ -1446,7 +1456,7 @@ document.getElementById('canvas-wrap').addEventListener('click',function(e){
   if(!trackData||trackData.length<2)return;
   var rect=cv.getBoundingClientRect();
   var name=prompt('PDI name:','')||'PDI '+(pdiList.length+1);
-  pdiList.push({nx:(e.clientX-rect.left)/rect.width,ny:(e.clientY-rect.top)/rect.height,name:name,triggered:false,radius:0.03});
+  pdiList.push({nx:(e.clientX-rect.left)/rect.width,ny:(e.clientY-rect.top)/rect.height,name:name,triggered:false});
   renderPDIs();
 });
 function renderPDIs(){
@@ -1483,24 +1493,6 @@ function renderPDIs(){
     el.appendChild(fileInput);
     el.appendChild(sBtn);
 
-    // radio slider
-    var rWrap=document.createElement('div');
-    rWrap.style.cssText='display:flex;align-items:center;gap:4px;margin-left:4px;';
-    var rLabel=document.createElement('span');
-    rLabel.style.cssText='font-size:0.7vh;color:rgba(255,255,255,0.4);white-space:nowrap;';
-    rLabel.textContent='r:'+(p.radius*100).toFixed(1);
-    var rSlider=document.createElement('input');
-    rSlider.type='range';rSlider.min=0.005;rSlider.max=0.15;rSlider.step=0.001;
-    rSlider.value=p.radius||0.03;
-    rSlider.style.cssText='width:50px;accent-color:rgba(255,255,255,0.6);cursor:pointer;';
-    (function(pi,lbl){
-      rSlider.addEventListener('input',function(){
-        pdiList[pi].radius=parseFloat(this.value);
-        lbl.textContent='r:'+( pdiList[pi].radius*100).toFixed(1);
-      });
-    })(i, rLabel);
-    rWrap.appendChild(rLabel);rWrap.appendChild(rSlider);el.appendChild(rWrap);
-
     // borrar
     var del=document.createElement('div');del.className='pdi-del';del.textContent='✕';
     del.addEventListener('click',function(){pdiList.splice(i,1);renderPDIs();});
@@ -1511,7 +1503,7 @@ function renderPDIs(){
 }
 function drawPDIs(S){
   // radio de afectacion: 0.03 en espacio normalizado = ~50m segun escala del canvas
-  // bufferR se calcula por PDI usando p.radius
+  var bufferR=S*0.03;
   var crossSize=S*0.008; // tamaño de la cruz
 
   pdiList.forEach(function(p){
@@ -1521,7 +1513,6 @@ function drawPDIs(S){
     // círculo de puntos — buffer de afectación
     ctx.beginPath();
     ctx.setLineDash([S*0.004, S*0.004]);
-    var bufferR=S*(p.radius||0.03);
     ctx.arc(px,py,bufferR,0,Math.PI*2);
     ctx.strokeStyle='rgba(255,255,255,0.2)';
     ctx.lineWidth=0.8;
@@ -1554,7 +1545,7 @@ function checkPDIs(pt){
   if(!AC)return;
   pdiList.forEach(function(p){
     var dx=p.nx-pt.nx,dy=p.ny-pt.ny;
-    if(Math.sqrt(dx*dx+dy*dy)<(p.radius||0.03)&&!p.triggered){
+    if(Math.sqrt(dx*dx+dy*dy)<0.03&&!p.triggered){
       p.triggered=true;
 
       // decodificar sample pendiente si el AC no estaba listo antes
@@ -1769,12 +1760,10 @@ function loop(ts){
           var vol2=(P.oscVol*0.3)/Math.sqrt(Math.max(1,allTracks.length));
           polyGains[ti_].gain.setTargetAtTime(vol2,AC.currentTime,0.1);
         }
-        // PDIs: todos los tracks los activan
-        checkPDIs(pt2);
         if(ti_===0){
           gpsCount++;if(gpsCount%divGPS===0)triggerClick();
           cadCount++;if(pt2.cadence>15&&cadCount%divCad===0)triggerKick(pt2.cadence);
-          window.polyCurrentTrack=ti_;checkRandomTrigger(pt2);
+          window.polyCurrentTrack=ti_;checkRandomTrigger(pt2);checkPDIs(pt2);
           if(frameCount%2===0){
             document.getElementById('d-ele').textContent=Math.round(pt2.ele)+'m';
             document.getElementById('d-hr').textContent=pt2.hr+' bpm';
