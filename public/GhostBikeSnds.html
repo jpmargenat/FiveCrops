@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>GhostBikeSnds — Flowing Cartographies</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body { width:100%; height:100%; background:#000; overflow:hidden; }
@@ -27,10 +29,19 @@ body { font-family:'Courier New', monospace; }
   flex-shrink:0;
   width:calc(100% * 2592 / 4032);
   height:100%;
-  background:#000;
+  background:#080808;
   position:relative;
+  overflow:hidden;
 }
-#c { display:block; width:100%; height:100%; }
+#map-bg {
+  position:absolute;
+  top:0; left:0; right:0; bottom:0;
+  z-index:0;
+}
+.leaflet-container { background:#080808 !important; }
+.leaflet-tile { filter: saturate(.06) brightness(.22) contrast(1.5); }
+.leaflet-control-attribution, .leaflet-control-zoom { display:none !important; }
+#c { display:block; width:100%; height:100%; position:relative; z-index:2; background:transparent !important; }
 
 /* ── PANEL ── */
 #panel {
@@ -271,6 +282,7 @@ body { font-family:'Courier New', monospace; }
 
   <!-- ── CANVAS ── -->
   <div id="canvas-wrap">
+    <div id="map-bg"></div>
     <canvas id="c"></canvas>
   </div>
 
@@ -512,6 +524,46 @@ const ELE_MIN=125.9,ELE_MAX=142.0,HR_MIN=65,HR_MAX=98,SPD_MAX=5.21;
 const cv=document.getElementById('c');
 const ctx=cv.getContext('2d');
 function resizeCanvas(){var w=document.getElementById('canvas-wrap');var ww=w.offsetWidth||600,hh=w.offsetHeight||600;cv.width=ww;cv.height=hh;}
+
+// ── MAPA BASE ──────────────────────────────────────────────────────────────
+var mapBG=null;
+function initMap(lat,lon,zoom){
+  if(!mapBG){
+    mapBG=L.map('map-bg',{
+      zoomControl:false,
+      attributionControl:false,
+      dragging:false,
+      scrollWheelZoom:false,
+      doubleClickZoom:false,
+      touchZoom:false,
+      keyboard:false
+    }).setView([lat,lon],zoom||15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(mapBG);
+  } else {
+    mapBG.setView([lat,lon],zoom||15);
+  }
+  setTimeout(function(){mapBG.invalidateSize();},100);
+}
+function fitMapToBounds(allPts){
+  if(!allPts||!allPts.length||!allPts[0].lat)return;
+  var lats=allPts.map(function(p){return p.lat;});
+  var lons=allPts.map(function(p){return p.lon;});
+  var la0=Math.min.apply(null,lats),la1=Math.max.apply(null,lats);
+  var lo0=Math.min.apply(null,lons),lo1=Math.max.apply(null,lons);
+  var bounds=[[la0,lo0],[la1,lo1]];
+  if(!mapBG){
+    initMap((la0+la1)/2,(lo0+lo1)/2,14);
+    setTimeout(function(){
+      mapBG.invalidateSize();
+      mapBG.fitBounds(bounds,{padding:[40,40]});
+    },300);
+  } else {
+    setTimeout(function(){
+      mapBG.invalidateSize();
+      mapBG.fitBounds(bounds,{padding:[40,40]});
+    },100);
+  }
+}
 resizeCanvas();
 setTimeout(resizeCanvas,100);
 window.addEventListener('resize',resizeCanvas);
@@ -1395,7 +1447,7 @@ function renderTrackList(){
     del.style.cssText='font-size:0.8vh;padding:1px 4px;border:none;background:transparent;color:rgba(255,80,60,0.5);cursor:pointer;';
     del.addEventListener('click',(function(idx){return function(){
       allTracks.splice(idx,1);polyIntervals.splice(idx,1);polyStates=[];
-      renderTrackList();if(allTracks.length)loadGPXData(allTracks[0]);
+      renderTrackList();if(allTracks.length){loadGPXData(allTracks[0]);var ap=[].concat.apply([],allTracks.map(function(t){return t.pts;}));fitMapToBounds(ap);}
     };})(i));
     row.appendChild(del);iWrap.appendChild(row);
   });
@@ -1411,6 +1463,7 @@ function readGPXFile(file){
     parseSingleFile(e.target.result,file.name,function(tracks){
       if(!tracks||!tracks.length){info.textContent='Error: '+file.name;return;}
       allTracks=allTracks.concat(tracks);renderTrackList();loadGPXData(allTracks[0]);
+      var allPts2=[].concat.apply([],allTracks.map(function(t){return t.pts;}));fitMapToBounds(allPts2);
       info.textContent=allTracks.length+' track'+(allTracks.length>1?'s':'')+' loaded';
       if(!playing){playing=true;document.getElementById('btn-play').classList.add('active');}
       if(tracks[0].pts&&tracks[0].pts.length>0)fetchHitosForTrack(tracks[0].pts);
@@ -1994,6 +2047,7 @@ document.getElementById('start').addEventListener('click',function(){
   if(AC&&AC.state==='suspended')AC.resume();
   rebuildPolyOscs();
   loadGPXData(allTracks[0]);
+  var ap0=[].concat.apply([],allTracks.map(function(t){return t.pts;}));fitMapToBounds(ap0);
   playing=true;
   document.getElementById('btn-play').classList.add('active');
   requestAnimationFrame(loop);
