@@ -8,84 +8,115 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Courier New',monospace;background:#0d0d0d;color:#ddd;height:100vh;display:flex;flex-direction:column;overflow:hidden}
-#hdr{padding:5px 14px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-#hdr h1{font-size:12px;letter-spacing:.18em;color:#ccc;font-weight:400}
-#hdr .sub{font-size:11px;color:#777;letter-spacing:.1em}
-#sd{width:7px;height:7px;border-radius:50%;background:#222;display:inline-block;margin-right:7px;transition:background .3s}
-#sd.on{background:#7fff7f;box-shadow:0 0 7px #7fff7f55}
+body{font-family:'Courier New',monospace;background:#f2f0eb;color:#1a1a1a;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#hdr{padding:5px 14px;border-bottom:1px solid #d0cec8;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#hdr h1{font-size:12px;letter-spacing:.18em;color:#333;font-weight:400}
+#hdr .sub{font-size:11px;color:#999;letter-spacing:.1em}
+#sd{width:7px;height:7px;border-radius:50%;background:#ccc;display:inline-block;margin-right:7px;transition:background .3s}
+#sd.on{background:#2a7a2a;box-shadow:0 0 7px #2a7a2a55}
 #main{flex:1;display:flex;overflow:hidden;min-height:0}
 #map{flex:1;position:relative}
-.leaflet-container{background:#111!important}
-.leaflet-tile{filter:saturate(.08) brightness(.28) contrast(1.4)}
-#panel{width:220px;background:#0d0d0d;border-left:1px solid #2a2a2a;display:flex;flex-direction:column;min-height:0}
-#ptop{padding:7px 11px 6px;border-bottom:1px solid #2a2a2a;flex-shrink:0}
-#ptop strong{font-size:12px;letter-spacing:.15em;color:#ddd}
-#cnt{font-size:12px;color:#999;margin-top:3px}
+.leaflet-container{background:#e8e6e0!important}
+.leaflet-tile{filter:saturate(.15) brightness(1.1) contrast(.9)}
+#panel{width:220px;background:#f2f0eb;border-left:1px solid #d0cec8;display:flex;flex-direction:column;min-height:0}
+#ptop{padding:7px 11px 6px;border-bottom:1px solid #d0cec8;flex-shrink:0}
+#ptop strong{font-size:12px;letter-spacing:.15em;color:#1a1a1a}
+#cnt{font-size:12px;color:#888;margin-top:3px}
 #feed{flex:1;overflow-y:scroll;padding:8px;display:block;min-height:0;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
 #feed::-webkit-scrollbar{width:2px}
-#feed::-webkit-scrollbar-thumb{background:#333}
-#fe{font-size:12px;color:#666;line-height:2;letter-spacing:.06em;padding:4px}
-.fc{border:1px solid #2a2a2a;background:#0f0f0f;overflow:hidden;animation:ci .3s ease;margin-bottom:6px}
+#feed::-webkit-scrollbar-thumb{background:#ccc}
+#fe{font-size:12px;color:#aaa;line-height:2;letter-spacing:.06em;padding:4px}
+.fc{border:1px solid #d8d6d0;background:#ebe9e3;overflow:hidden;animation:ci .3s ease;margin-bottom:6px}
 @keyframes ci{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
-.fi{width:100%;height:130px;overflow:hidden;background:#080808;cursor:pointer;position:relative}
+.fi{width:100%;height:130px;overflow:hidden;background:#ddd;cursor:pointer;position:relative}
 .fi img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s}
-.fi:hover img{opacity:.8}
-.fi .zh{position:absolute;bottom:4px;right:5px;font-size:9px;color:#ccc;opacity:0;transition:opacity .2s}
+.fi:hover img{opacity:.85}
+.fi .zh{position:absolute;bottom:4px;right:5px;font-size:9px;color:#333;opacity:0;transition:opacity .2s}
 .fi:hover .zh{opacity:1}
-.ac{padding:14px 12px;background:#080808;display:flex;flex-direction:column;gap:10px}
+.ac{padding:14px 12px;background:#e5e3dd;display:flex;flex-direction:column;gap:10px}
 .at{font-size:11px;letter-spacing:.08em}
 .ap{display:flex;align-items:center;gap:8px}
-.pb{font-family:'Courier New',monospace;font-size:11px;width:36px;padding:6px 0;background:transparent;border:1px solid #555;color:#ccc;cursor:pointer}
-.pw{flex:1;height:3px;background:#222;cursor:pointer}
+.pb{font-family:'Courier New',monospace;font-size:11px;width:36px;padding:6px 0;background:transparent;border:1px solid #aaa;color:#333;cursor:pointer}
+.pw{flex:1;height:3px;background:#ccc;cursor:pointer}
 .pp{height:100%;width:0%}
-.ptm{font-size:10px;color:#666;white-space:nowrap;min-width:36px;text-align:right}
+.ptm{font-size:10px;color:#999;white-space:nowrap;min-width:36px;text-align:right}
 .wv{display:flex;align-items:center;gap:1px;height:20px}
-.wv span{flex:1;background:#7fff7f22;min-width:2px;border-radius:1px}
+.wv span{flex:1;background:#2a7a2a22;min-width:2px;border-radius:1px}
 .fm{padding:7px 9px}
-.fl{font-size:13px;color:#eee;font-weight:bold;letter-spacing:.04em;display:block}
-.fs{font-size:11px;color:#999;margin-top:3px}
+.fl{font-size:13px;color:#111;font-weight:bold;letter-spacing:.04em;display:block}
+.fs{font-size:11px;color:#777;margin-top:3px}
 .ftag{display:inline-block;font-size:9px;padding:1px 5px;margin-top:4px;letter-spacing:.08em;border:1px solid}
-.fg{display:flex;gap:3px;background:#080808}
+.fg{display:flex;gap:3px;background:#e5e3dd}
 .fgt{flex-shrink:0;width:56px;height:40px;overflow:hidden;cursor:pointer;opacity:.7;transition:opacity .2s}
 .fgt:hover,.fgt.sel{opacity:1}
-.fgt.sel{outline:1px solid #7fff7f}
+.fgt.sel{outline:1px solid #2a7a2a}
 .fgt img{width:100%;height:100%;object-fit:cover;display:block}
-#bot{padding:6px 11px;border-top:1px solid #2a2a2a;display:flex;flex-direction:column;gap:3px;flex-shrink:0;max-height:155px}
+#bot{padding:6px 11px;border-top:1px solid #d0cec8;display:flex;flex-direction:column;gap:3px;flex-shrink:0;max-height:155px}
 .sr{display:flex;align-items:center;gap:8px}
-.sr label{font-size:10px;color:#aaa;letter-spacing:.07em;white-space:nowrap}
-.sr input[type=range]{flex:1;accent-color:#7fff7f}
-.sr span{font-size:12px;color:#ddd;min-width:28px}
+.sr label{font-size:10px;color:#888;letter-spacing:.07em;white-space:nowrap}
+.sr input[type=range]{flex:1;accent-color:#2a7a2a}
+.sr span{font-size:12px;color:#333;min-width:28px}
 .br{display:flex;gap:6px}
-.br button{flex:1;font-family:'Courier New',monospace;font-size:12px;letter-spacing:.1em;padding:9px 0;background:transparent;border:1px solid #444;color:#ccc;cursor:pointer;transition:all .2s}
-.br button:hover{border-color:#aaa;color:#fff}
-.br button.on{border-color:#7fff7f;color:#7fff7f}
+.br button{flex:1;font-family:'Courier New',monospace;font-size:12px;letter-spacing:.1em;padding:9px 0;background:transparent;border:1px solid #bbb;color:#555;cursor:pointer;transition:all .2s}
+.br button:hover{border-color:#555;color:#111}
+.br button.on{border-color:#2a7a2a;color:#2a7a2a}
 #sl{font-size:11px;color:#888;letter-spacing:.06em}
-#sl2{font-size:10px;color:#555;letter-spacing:.06em;margin-top:2px}
-#lb{display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:10px}
+#sl2{font-size:10px;color:#bbb;letter-spacing:.06em;margin-top:2px}
+#lb{display:none;position:fixed;inset:0;background:rgba(242,240,235,.96);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:10px}
 #lb.open{display:flex}
-#lb img{max-width:88vw;max-height:78vh;object-fit:contain;border:1px solid #333}
+#lb img{max-width:88vw;max-height:78vh;object-fit:contain;border:1px solid #ccc}
 #lb-meta{font-size:11px;color:#888;letter-spacing:.07em;text-align:center}
 #lb-nav{display:flex;gap:12px}
-#lb-nav button{font-family:'Courier New',monospace;font-size:11px;background:transparent;border:1px solid #333;color:#aaa;padding:4px 12px;cursor:pointer}
-#lb-nav button:hover{border-color:#aaa;color:#fff}
-#lb-close{font-size:11px;color:#ccc;cursor:pointer;letter-spacing:.12em;border:1px solid #444;padding:6px 16px;background:transparent;font-family:'Courier New',monospace}
+#lb-nav button{font-family:'Courier New',monospace;font-size:11px;background:transparent;border:1px solid #ccc;color:#666;padding:4px 12px;cursor:pointer}
+#lb-nav button:hover{border-color:#555;color:#111}
+#lb-close{font-size:11px;color:#444;cursor:pointer;letter-spacing:.12em;border:1px solid #bbb;padding:6px 16px;background:transparent;font-family:'Courier New',monospace}
 
-.map-ph{position:absolute;z-index:500;transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;border:1px solid rgba(255,255,255,.3);overflow:hidden;transition:border-color .2s;margin-top:-8px;}
-.map-ph:hover{border-color:#fff;}
-.map-ph img{width:108px;height:75px;object-fit:cover;display:block;filter:saturate(.7);}
-.map-ph-pin{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:1px;height:6px;background:rgba(255,255,255,.4);}
+.map-ph{position:absolute;z-index:500;transform:translate(-50%,-100%);pointer-events:auto;cursor:pointer;border:1px solid rgba(0,0,0,.2);overflow:hidden;transition:border-color .2s;margin-top:-8px;}
+.map-ph:hover{border-color:#000;}
+.map-ph img{width:108px;height:75px;object-fit:cover;display:block;filter:saturate(.8);}
+.map-ph-pin{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:1px;height:6px;background:rgba(0,0,0,.3);}
 .rider-label{
   background:transparent!important;
   border:none!important;
   box-shadow:none!important;
   font-family:'Courier New',monospace;
-  font-size:9px;
+  font-size:10px;
   letter-spacing:.08em;
-  color:#fff;
-  text-shadow:0 0 4px #000,0 0 8px #000;
+  color:#111;
+  text-shadow:0 0 3px #f2f0eb,0 0 8px #f2f0eb,0 0 2px #f2f0eb;
   white-space:nowrap;
 }
+#welcome-modal{
+  display:none;position:fixed;inset:0;background:rgba(242,240,235,.97);
+  z-index:9999;align-items:center;justify-content:center;flex-direction:column;
+}
+#welcome-modal.open{display:flex;}
+#welcome-box{
+  border:1px solid #d0cec8;background:#fff;padding:28px 28px 22px;
+  max-width:300px;width:90%;display:flex;flex-direction:column;gap:14px;
+}
+#welcome-box h2{font-size:13px;letter-spacing:.15em;color:#111;font-weight:400;margin:0}
+#welcome-box p{font-size:11px;color:#888;letter-spacing:.06em;line-height:1.8;margin:0}
+#welcome-name{
+  font-family:'Courier New',monospace;font-size:12px;background:#f7f6f2;
+  border:1px solid #d0cec8;color:#111;padding:8px 10px;width:100%;letter-spacing:.08em;
+  outline:none;
+}
+#welcome-name:focus{border-color:#2a7a2a;}
+#welcome-name::placeholder{color:#bbb;}
+.color-row{display:flex;gap:6px;flex-wrap:wrap;}
+.color-dot{
+  width:22px;height:22px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:transform .15s;flex-shrink:0;
+}
+.color-dot:hover{transform:scale(1.15);}
+.color-dot.sel{border-color:#111;}
+#welcome-go{
+  font-family:'Courier New',monospace;font-size:11px;letter-spacing:.15em;
+  padding:10px 0;background:transparent;border:1px solid #bbb;color:#555;
+  cursor:pointer;transition:all .2s;width:100%;
+}
+#welcome-go:hover{border-color:#2a7a2a;color:#2a7a2a;}
 </style>
 </head>
 <body>
@@ -116,6 +147,19 @@ body{font-family:'Courier New',monospace;background:#0d0d0d;color:#ddd;height:10
   <div id="lb-nav"><button id="lb-prev">&#8592; ANT</button><button id="lb-next">SIG &#8594;</button></div>
   <div id="lb-meta"></div>
   <button id="lb-close">CERRAR</button>
+</div>
+
+<div id="welcome-modal">
+  <div id="welcome-box">
+    <h2>BIENVENIDX!</h2>
+    <p>Vamos a Pedaludikear<br>Tu posición va a ser visible.<br>Elegí cómo aparecer en el mapa.</p>
+    <input id="welcome-name" type="text" maxlength="20" placeholder="tu nombre..." autocomplete="off" spellcheck="false">
+    <div>
+      <div style="font-size:10px;color:#aaa;letter-spacing:.1em;margin-bottom:8px">SELECCIONÁ UN COLOR PARA TU TRAZO</div>
+      <div class="color-row" id="color-row"></div>
+    </div>
+    <button id="welcome-go">▶ ENTRAR AL MAPA</button>
+  </div>
 </div>
 <script>
 // posición inicial (centro del área)
@@ -291,8 +335,8 @@ hud.innerHTML=''
   +'<div style="display:flex;gap:6px"><span style="color:#666;min-width:170px">VIENTO:</span><span id="w-line" style="color:#88ccff">—</span></div>'
   +'<div style="display:flex;gap:6px"><span style="color:#666;min-width:170px">ACTIVIDAD SÍSMICA:</span><span id="q-line" style="color:#ff7755">—</span></div>'
   +'<div style="display:flex;gap:6px"><span style="color:#666;min-width:170px">CALIDAD DEL AIRE:</span><span id="aq-line" style="color:#ddbb44">—</span></div>'
-  +'<div style="display:flex;gap:6px"><span style="color:#666;min-width:170px">ALTITUD:</span><span id="alt-line" style="color:#ccc">—</span></div>'
-  +'<div style="display:flex;gap:6px"><span style="color:#666;min-width:170px">MILLAS RECORRIDAS:</span><span id="mi-line" style="color:#ccc">—</span></div>';
+  +'<div style="display:flex;gap:6px"><span style="color:#666;min-width:170px">ALTITUD:</span><span id="alt-line" style="color:#222">—</span></div>'
+  +'<div style="display:flex;gap:6px"><span style="color:#666;min-width:170px">MILLAS RECORRIDAS:</span><span id="mi-line" style="color:#222">—</span></div>';
 document.getElementById('map').appendChild(hud);
 
 // ── VIENTO ────────────────────────────────────────────────────────────────────
@@ -434,11 +478,11 @@ function showPdiWord(p){
   wrap.style.cssText='position:absolute;pointer-events:none;transition:opacity .5s;opacity:0;';
   wrap.style.left=pt.x+'px'; wrap.style.top=(pt.y-28)+'px';
   const n=document.createElement('div');
-  n.style.cssText='font-size:11px;letter-spacing:.16em;color:#fff;white-space:nowrap;text-transform:uppercase;line-height:1.4;';
+  n.style.cssText='font-size:11px;letter-spacing:.16em;color:#111;white-space:nowrap;text-transform:uppercase;line-height:1.4;';
   n.textContent=p.name; wrap.appendChild(n);
   if(p.desc){
     const d2=document.createElement('div');
-    d2.style.cssText='font-size:9px;letter-spacing:.1em;color:#aaa;white-space:nowrap;margin-top:2px;';
+    d2.style.cssText='font-size:9px;letter-spacing:.1em;color:#555;white-space:nowrap;margin-top:2px;';
     d2.textContent=p.desc; wrap.appendChild(d2);
   }
   wordDiv.appendChild(wrap);
@@ -494,8 +538,8 @@ GEOPOINTS.forEach(p=>{
 });
 
 // ── BICI ──────────────────────────────────────────────────────────────────────
-const bikeIcon=L.divIcon({html:'<div style="width:12px;height:12px;background:#fff;border-radius:50%;border:2px solid #0d0d0d;box-shadow:0 0 10px rgba(255,255,255,.5)"></div>',iconSize:[12,12],iconAnchor:[6,6],className:''});
-const bike=L.marker(START_POS,{icon:bikeIcon,zIndexOffset:1000}).addTo(map);
+const bikeIcon=L.divIcon({html:'<div style="width:12px;height:12px;background:#111;border-radius:50%;border:2px solid #f2f0eb;box-shadow:0 0 10px rgba(0,0,0,.3)"></div>',iconSize:[12,12],iconAnchor:[6,6],className:''});
+const bike=L.marker(START_POS,{icon:bikeIcon,zIndexOffset:1000,opacity:0}).addTo(map);
 
 // ── TRAIL ─────────────────────────────────────────────────────────────────────
 let FADE_START=4000,FADE_END=25000;
@@ -772,12 +816,13 @@ let gpsBroadcastTimer=null;
 const GPS_TAG='📍GPS';  // prefijo para distinguir de mensajes normales
 
 async function broadcastPos(lat,lon,spd){
-  const txt=GPS_TAG+' '+window.MY_NAME+' '+lat.toFixed(6)+','+lon.toFixed(6)+(spd?','+spd.toFixed(1):'');
+  const color=window.MY_COLOR||'#7fff7f';
+  const txt=GPS_TAG+' '+window.MY_NAME+' '+lat.toFixed(6)+','+lon.toFixed(6)+(spd?','+spd.toFixed(1):'')+','+color;
   try{
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:TG_CHAT,text:txt})
+      body:JSON.stringify({chat_id:TG_CHAT,text:txt,message_thread_id:546})
     });
   }catch(e){}
 }
@@ -787,12 +832,29 @@ function startGPS(){
     document.getElementById('sl').textContent='GPS no disponible';
     return;
   }
-  // pedir nombre antes de arrancar
   if(!window.MY_NAME){
-    const n=prompt('Tu nombre en el mapa:','ciclista');
-    if(n===null) return; // canceló
-    window.MY_NAME=n||'ciclista';
+    openWelcome(()=>_startGPSActual());
+    return;
   }
+  _startGPSActual();
+}
+
+function openWelcome(cb){
+  const modal=document.getElementById('welcome-modal');
+  modal.classList.add('open');
+  document.getElementById('welcome-name').focus();
+  document.getElementById('welcome-go').onclick=()=>{
+    const n=document.getElementById('welcome-name').value.trim();
+    window.MY_NAME=n||'ciclista';
+    modal.classList.remove('open');
+    cb();
+  };
+  document.getElementById('welcome-name').onkeydown=e=>{
+    if(e.key==='Enter') document.getElementById('welcome-go').click();
+  };
+}
+
+function _startGPSActual(){
   gpsMode=1;
   const btn=document.getElementById('bp'),dot=document.getElementById('sd');
   btn.innerHTML='⏹ DETENER GPS';btn.classList.add('on');dot.classList.add('on');
@@ -809,6 +871,8 @@ function startGPS(){
         map.setView(p,17);
         firstFix=false;
       }
+      // mover marcador propio con nombre y color elegido
+      moveRider(window.MY_NAME, lat, lon, spd!=null?spd*3.6:null, window.MY_COLOR);
       bike.setLatLng(p);
       drawTrail(p);
       if(lastBikePos){
@@ -898,41 +962,65 @@ document.getElementById('fds').oninput=e=>{
 // ── TELEGRAM ──────────────────────────────────────────────────
 const TG_TOKEN='8292313956:AAHQxGj5WHQH68fF7AFVlk8y91DLmgdSIxM';
 
+// ── COLOR PROPIO ──────────────────────────────────────────────
+window.MY_COLOR=null;
+const WELCOME_COLORS=['#7fff7f','#ff6b6b','#ffd93d','#4d96ff','#ff9f1c','#c77dff','#ff6fcf','#00f5d4','#ffffff'];
+(function initColorRow(){
+  const row=document.getElementById('color-row');
+  WELCOME_COLORS.forEach((c,i)=>{
+    const d=document.createElement('div');
+    d.className='color-dot'+(i===0?' sel':'');
+    d.style.background=c;
+    d.onclick=()=>{
+      row.querySelectorAll('.color-dot').forEach(x=>x.classList.remove('sel'));
+      d.classList.add('sel');
+      window.MY_COLOR=c;
+    };
+    row.appendChild(d);
+  });
+  window.MY_COLOR=WELCOME_COLORS[0];
+})();
+
 // ── MULTI-BICI ────────────────────────────────────────────────
 const RIDER_COLORS=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff9f1c','#c77dff','#ff6fcf','#00f5d4'];
 const riders={};  // {name: {marker, color, trail:[]}}
 let riderColorIdx=0;
 
-function getRiderColor(name){
+function getRiderColor(name, forceColor){
   if(!riders[name]){
-    const color=RIDER_COLORS[riderColorIdx%RIDER_COLORS.length];
-    riderColorIdx++;
-    // crear marcador para este ciclista
+    const color=forceColor||(RIDER_COLORS[riderColorIdx%RIDER_COLORS.length]);
+    if(!forceColor) riderColorIdx++;
     const icon=L.divIcon({
-      html:'<div style="width:10px;height:10px;border-radius:50%;background:'+color+';box-shadow:0 0 8px '+color+'88;border:1px solid #fff"></div>',
-      iconSize:[10,10],iconAnchor:[5,5],className:''
+      html:'<div style="width:12px;height:12px;border-radius:50%;background:'+color+';box-shadow:0 0 10px '+color+'99;border:1.5px solid rgba(255,255,255,.8)"></div>',
+      iconSize:[12,12],iconAnchor:[6,6],className:''
     });
     const marker=L.marker([34.0695,-118.228],{icon,zIndexOffset:900}).addTo(map);
-    // label con nombre
-    marker.bindTooltip(name,{permanent:true,direction:'top',offset:[0,-8],
+    marker.bindTooltip(name,{permanent:true,direction:'top',offset:[0,-10],
       className:'rider-label',opacity:1});
     riders[name]={marker,color,lastPos:null};
+  } else if(forceColor && riders[name].color!==forceColor){
+    // actualizar color si cambió
+    riders[name].color=forceColor;
+    const icon=L.divIcon({
+      html:'<div style="width:12px;height:12px;border-radius:50%;background:'+forceColor+';box-shadow:0 0 10px '+forceColor+'99;border:1.5px solid rgba(255,255,255,.8)"></div>',
+      iconSize:[12,12],iconAnchor:[6,6],className:''
+    });
+    riders[name].marker.setIcon(icon);
   }
   return riders[name];
 }
 
-function moveRider(name,lat,lon,spd){
-  const r=getRiderColor(name);
+function moveRider(name,lat,lon,spd,color){
+  const r=getRiderColor(name,color);
   const p=[lat,lon];
   r.marker.setLatLng(p);
-  // mini trail por ciclista
   if(r.lastPos){
-    const dl=L.polyline([r.lastPos,p],{color:r.color,weight:2,opacity:.6}).addTo(map);
+    const dl=L.polyline([r.lastPos,p],{color:r.color,weight:2.5,opacity:.7}).addTo(map);
     setTimeout(()=>map.removeLayer(dl),60000);
   }
   r.lastPos=p;
-  // actualizar tooltip con velocidad
-  if(spd) r.marker.setTooltipContent(name+' '+spd.toFixed(0)+'km/h');
+  const label=name+(spd?' · '+spd.toFixed(0)+'km/h':'');
+  r.marker.setTooltipContent(label);
 }
 const TG_CHAT='-1003921884533';
 let tgOffset=0;
@@ -944,7 +1032,7 @@ function addTgFeed(user,text,ts){
   d.className='fc';
   const t=new Date(ts*1000);
   const hm=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
-  d.innerHTML=`<div style="padding:7px 9px;border-left:2px solid #7ff;"><div style="font-size:10px;color:#7ff;letter-spacing:.1em;margin-bottom:3px">TG · ${hm} · ${user}</div><div style="font-size:12px;color:#ddd;line-height:1.4">${text}</div></div>`;
+  d.innerHTML=`<div style="padding:7px 9px;border-left:2px solid #2a7a2a;"><div style="font-size:10px;color:#2a7a2a;letter-spacing:.1em;margin-bottom:3px">TG · ${hm} · ${user}</div><div style="font-size:12px;color:#1a1a1a;line-height:1.4">${text}</div></div>`;
   feed.insertBefore(d,feed.firstChild);
   const cnt=document.getElementById('cnt');
   cnt.textContent=(parseInt(cnt.textContent)||0)+1+' elementos';
@@ -955,8 +1043,8 @@ function showTgWord(user,text){
   const jlat=base[0]+(Math.random()-.5)*.003;
   const jlon=base[1]+(Math.random()-.5)*.004;
   const html=`<div style="text-align:center;pointer-events:none;font-family:'Courier New',monospace;">
-    <div style="color:#7ff;font-size:11px;letter-spacing:.12em;text-transform:uppercase;text-shadow:0 0 8px rgba(119,255,255,.7)">${user}</div>
-    <div style="color:#aee;font-size:10px;letter-spacing:.08em;margin-top:2px;max-width:160px;line-height:1.35;word-break:break-word;text-shadow:0 0 6px rgba(170,238,238,.5)">${text.slice(0,80)}</div>
+    <div style="color:#1a6b1a;font-size:11px;letter-spacing:.12em;text-transform:uppercase;">${user}</div>
+    <div style="color:#333;font-size:10px;letter-spacing:.08em;margin-top:2px;max-width:160px;line-height:1.35;word-break:break-word;">${text.slice(0,80)}</div>
   </div>`;
   const icon=L.divIcon({html,className:'',iconSize:[160,40],iconAnchor:[80,20]});
   const m=L.marker([jlat,jlon],{icon,zIndexOffset:1200,interactive:false}).addTo(map);
@@ -1018,8 +1106,8 @@ function addTgAudioFeed(user,audioUrl,label,ts){
   const hm=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
   // crear el audio element para tener control real
   const wrapper=document.createElement('div');
-  wrapper.style.cssText='padding:7px 9px;border-left:2px solid #f7a;';
-  wrapper.innerHTML=`<div style="font-size:10px;color:#f7a;letter-spacing:.1em;margin-bottom:4px">TG · ${hm} · ${user}</div><div style="font-size:11px;color:#ddd;margin-bottom:6px">${label}</div>`;
+  wrapper.style.cssText='padding:7px 9px;border-left:2px solid #c05020;';
+  wrapper.innerHTML=`<div style="font-size:10px;color:#c05020;letter-spacing:.1em;margin-bottom:4px">TG · ${hm} · ${user}</div><div style="font-size:11px;color:#1a1a1a;margin-bottom:6px">${label}</div>`;
   const audio=document.createElement('audio');
   audio.controls=true;
   audio.style.cssText='width:100%;height:28px;filter:invert(1) hue-rotate(90deg);';
@@ -1036,9 +1124,9 @@ function showTgAudioWord(user,label){
   const jlat=base[0]+(Math.random()-.5)*.003;
   const jlon=base[1]+(Math.random()-.5)*.004;
   const html=`<div style="text-align:center;pointer-events:none;font-family:'Courier New',monospace;">
-    <div style="color:#f7a;font-size:13px;text-shadow:0 0 10px rgba(255,120,170,.8)">♪</div>
-    <div style="color:#f7a;font-size:10px;letter-spacing:.1em;text-transform:uppercase;text-shadow:0 0 8px rgba(255,120,170,.6);margin-top:2px">${user}</div>
-    <div style="color:#fcc;font-size:9px;letter-spacing:.07em;margin-top:1px">${label.slice(0,30)}</div>
+    <div style="color:#c05020;font-size:13px;">♪</div>
+    <div style="color:#c05020;font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-top:2px">${user}</div>
+    <div style="color:#555;font-size:9px;letter-spacing:.07em;margin-top:1px">${label.slice(0,30)}</div>
   </div>`;
   const icon=L.divIcon({html,className:'',iconSize:[140,50],iconAnchor:[70,25]});
   const m=L.marker([jlat,jlon],{icon,zIndexOffset:1200,interactive:false}).addTo(map);
@@ -1065,7 +1153,7 @@ function addTgPhotoFeed(user,imgUrl,caption,ts){
   d.className='fc';
   const t=new Date(ts*1000);
   const hm=t.getHours().toString().padStart(2,'0')+':'+t.getMinutes().toString().padStart(2,'0');
-  d.innerHTML=`<div style="padding:7px 9px;border-left:2px solid #7ff;"><div style="font-size:10px;color:#7ff;letter-spacing:.1em;margin-bottom:4px">TG · ${hm} · ${user}</div><img src="${imgUrl}" style="width:100%;max-height:140px;object-fit:cover;display:block;filter:saturate(.8);border:1px solid #333;" />${caption?'<div style="font-size:10px;color:#aaa;margin-top:4px">'+caption+'</div>':''}</div>`;
+  d.innerHTML=`<div style="padding:7px 9px;border-left:2px solid #1a6b9a;"><div style="font-size:10px;color:#1a6b9a;letter-spacing:.1em;margin-bottom:4px">TG · ${hm} · ${user}</div><img src="${imgUrl}" style="width:100%;max-height:140px;object-fit:cover;display:block;filter:saturate(.85);border:1px solid #ccc;" />${caption?'<div style="font-size:10px;color:#555;margin-top:4px">'+caption+'</div>':''}</div>`;
   feed.insertBefore(d,feed.firstChild);
   const cnt=document.getElementById('cnt');
   cnt.textContent=(parseInt(cnt.textContent)||0)+1+' elementos';
@@ -1076,8 +1164,8 @@ function showTgPhoto(imgUrl,user){
   const jlat=base[0]+(Math.random()-.5)*.003;
   const jlon=base[1]+(Math.random()-.5)*.004;
   const html=`<div style="text-align:center;pointer-events:none;font-family:'Courier New',monospace;">
-    <div style="font-size:10px;color:#7ff;letter-spacing:.1em;margin-bottom:3px;text-shadow:0 0 6px rgba(119,255,255,.7)">${user}</div>
-    <img src="${imgUrl}" style="width:120px;height:90px;object-fit:cover;border:1px solid rgba(119,255,255,.5);filter:saturate(.75);display:block;"/>
+    <div style="font-size:10px;color:#1a6b9a;letter-spacing:.1em;margin-bottom:3px;">${user}</div>
+    <img src="${imgUrl}" style="width:120px;height:90px;object-fit:cover;border:1px solid rgba(0,0,0,.2);filter:saturate(.85);display:block;"/>
   </div>`;
   const icon=L.divIcon({html,className:'',iconSize:[120,110],iconAnchor:[60,110]});
   const m=L.marker([jlat,jlon],{icon,zIndexOffset:1200,interactive:false}).addTo(map);
@@ -1098,18 +1186,20 @@ async function pollTelegram(){
         if(!msg) return;
         if(String(msg.chat.id)!==String(TG_CHAT)) return;
         const user=msg.from.first_name||(msg.from.username||'?');
-        if(msg.photo && msg.photo.length){
+        const isGpsMedia=msg.message_thread_id===546;
+        if(msg.photo && msg.photo.length && !isGpsMedia){
           const best=msg.photo[msg.photo.length-1];
           fetchTgPhoto(best.file_id,user,msg.caption||'',msg.date);
-        } else if(msg.voice){
+        } else if(msg.voice && !isGpsMedia){
           fetchTgAudio(msg.voice.file_id,user,'🎙️ voz',msg.date);
-        } else if(msg.audio){
+        } else if(msg.audio && !isGpsMedia){
           const label=msg.audio.title||msg.audio.file_name||'🎵 audio';
           fetchTgAudio(msg.audio.file_id,user,label,msg.date);
         } else if(msg.text){
           // parsear posición GPS transmitida
-          if(msg.text.startsWith('📍GPS ')){
-            // formato: 📍GPS nombre lat,lon[,spd]
+          // thread 546 = tema GPS silencioso — solo mover riders, nunca al feed
+          const isGpsThread=msg.message_thread_id===546;
+          if(isGpsThread && msg.text.startsWith('📍GPS ')){
             const raw=msg.text.replace('📍GPS ','');
             const sp=raw.indexOf(' ');
             if(sp>0){
@@ -1118,10 +1208,9 @@ async function pollTelegram(){
               if(parts.length>=2){
                 const rlat=parseFloat(parts[0]),rlon=parseFloat(parts[1]);
                 const rspd=parts[2]?parseFloat(parts[2]):null;
+                const rcolor=parts[3]||null;
                 if(!isNaN(rlat)&&!isNaN(rlon)){
-                  // mover marcador del ciclista específico
-                  moveRider(rname,rlat,rlon,rspd);
-                  // si somos espectadores (no GPS activo), centrar en el primer ciclista
+                  moveRider(rname,rlat,rlon,rspd,rcolor);
                   if(gpsMode===0 && Object.keys(riders).length===1){
                     map.panTo([rlat,rlon],{animate:true,duration:3});
                   }
@@ -1130,7 +1219,8 @@ async function pollTelegram(){
                 }
               }
             }
-          } else {
+          } else if(!isGpsThread){
+            // mensajes del chat general → feed + mapa
             addTgFeed(user,msg.text,msg.date);
             showTgWord(user,msg.text);
           }
