@@ -883,14 +883,20 @@ let lastGpsPos=null;
 let gpsBroadcastTimer=null;
 const GPS_TAG='📍GPS';  // prefijo para distinguir de mensajes normales
 
+const NIN_WORKER='https://pliss-nin.jpmargenat.workers.dev';
+
 async function broadcastPos(lat,lon,spd){
   const color=window.MY_COLOR||'#7fff7f';
-  const txt=GPS_TAG+' '+window.MY_NAME+' '+lat.toFixed(6)+','+lon.toFixed(6)+(spd?','+spd.toFixed(1):'')+','+color;
   try{
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+    await fetch(NIN_WORKER+'/gps',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:TG_CHAT,text:txt,message_thread_id:546})
+      body:JSON.stringify({
+        rider:window.MY_NAME,
+        lat,lon,
+        spd:spd||null,
+        color
+      })
     });
   }catch(e){}
 }
@@ -1301,10 +1307,27 @@ async function pollTelegram(){
   if(tgActive) setTimeout(pollTelegram,5000);
 }
 
+// ── POLL RIDERS desde Worker ─────────────────────────────────
+async function pollRiders(){
+  try{
+    const r=await fetch(NIN_WORKER+'/riders');
+    const data=await r.json();
+    Object.entries(data).forEach(([name,d])=>{
+      if(name===window.MY_NAME) return; // yo ya me muevo localmente
+      moveRider(name,d.lat,d.lon,d.spd,d.color);
+      if(gpsMode===0 && Object.keys(riders).length===1){
+        map.panTo([d.lat,d.lon],{animate:true,duration:3});
+      }
+    });
+  }catch(e){}
+  setTimeout(pollRiders,5000);
+}
+
 // auto-arranca el polling al cargar
 window.addEventListener('load',()=>{
   tgActive=true;
   pollTelegram();
+  pollRiders();
   initMobile();
 });
 
