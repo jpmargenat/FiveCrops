@@ -1254,6 +1254,8 @@ async function pollTelegram(){
         if(!msg) return;
         if(String(msg.chat.id)!==String(TG_CHAT)) return;
         const user=msg.from.first_name||(msg.from.username||'?');
+        // DEBUG temporal — ver thread IDs en consola
+        if(msg.message_thread_id) console.log('thread_id:',msg.message_thread_id,'text:',msg.text?.slice(0,30));
         const isGpsMedia=msg.message_thread_id===546;
         if(msg.photo && msg.photo.length && !isGpsMedia){
           const best=msg.photo[msg.photo.length-1];
