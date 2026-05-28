@@ -11,8 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ToolsRouteImport } from './routes/tools'
 import { Route as SystemRouteImport } from './routes/system'
+import { Route as PlissRouteImport } from './routes/pliss'
 import { Route as GalleryRouteImport } from './routes/gallery'
+import { Route as FlowingcartographiesRouteImport } from './routes/flowingcartographies'
+import { Route as FivecropsRouteImport } from './routes/fivecrops'
 import { Route as DogtownRouteImport } from './routes/dogtown'
+import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CropSlugRouteImport } from './routes/crop.$slug'
 
@@ -26,14 +30,34 @@ const SystemRoute = SystemRouteImport.update({
   path: '/system',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PlissRoute = PlissRouteImport.update({
+  id: '/pliss',
+  path: '/pliss',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GalleryRoute = GalleryRouteImport.update({
   id: '/gallery',
   path: '/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FlowingcartographiesRoute = FlowingcartographiesRouteImport.update({
+  id: '/flowingcartographies',
+  path: '/flowingcartographies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FivecropsRoute = FivecropsRouteImport.update({
+  id: '/fivecrops',
+  path: '/fivecrops',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DogtownRoute = DogtownRouteImport.update({
   id: '/dogtown',
   path: '/dogtown',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreditsRoute = CreditsRouteImport.update({
+  id: '/credits',
+  path: '/credits',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -49,16 +73,24 @@ const CropSlugRoute = CropSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/credits': typeof CreditsRoute
   '/dogtown': typeof DogtownRoute
+  '/fivecrops': typeof FivecropsRoute
+  '/flowingcartographies': typeof FlowingcartographiesRoute
   '/gallery': typeof GalleryRoute
+  '/pliss': typeof PlissRoute
   '/system': typeof SystemRoute
   '/tools': typeof ToolsRoute
   '/crop/$slug': typeof CropSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/credits': typeof CreditsRoute
   '/dogtown': typeof DogtownRoute
+  '/fivecrops': typeof FivecropsRoute
+  '/flowingcartographies': typeof FlowingcartographiesRoute
   '/gallery': typeof GalleryRoute
+  '/pliss': typeof PlissRoute
   '/system': typeof SystemRoute
   '/tools': typeof ToolsRoute
   '/crop/$slug': typeof CropSlugRoute
@@ -66,8 +98,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/credits': typeof CreditsRoute
   '/dogtown': typeof DogtownRoute
+  '/fivecrops': typeof FivecropsRoute
+  '/flowingcartographies': typeof FlowingcartographiesRoute
   '/gallery': typeof GalleryRoute
+  '/pliss': typeof PlissRoute
   '/system': typeof SystemRoute
   '/tools': typeof ToolsRoute
   '/crop/$slug': typeof CropSlugRoute
@@ -76,18 +112,36 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/credits'
     | '/dogtown'
+    | '/fivecrops'
+    | '/flowingcartographies'
     | '/gallery'
+    | '/pliss'
     | '/system'
     | '/tools'
     | '/crop/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dogtown' | '/gallery' | '/system' | '/tools' | '/crop/$slug'
+  to:
+    | '/'
+    | '/credits'
+    | '/dogtown'
+    | '/fivecrops'
+    | '/flowingcartographies'
+    | '/gallery'
+    | '/pliss'
+    | '/system'
+    | '/tools'
+    | '/crop/$slug'
   id:
     | '__root__'
     | '/'
+    | '/credits'
     | '/dogtown'
+    | '/fivecrops'
+    | '/flowingcartographies'
     | '/gallery'
+    | '/pliss'
     | '/system'
     | '/tools'
     | '/crop/$slug'
@@ -95,8 +149,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CreditsRoute: typeof CreditsRoute
   DogtownRoute: typeof DogtownRoute
+  FivecropsRoute: typeof FivecropsRoute
+  FlowingcartographiesRoute: typeof FlowingcartographiesRoute
   GalleryRoute: typeof GalleryRoute
+  PlissRoute: typeof PlissRoute
   SystemRoute: typeof SystemRoute
   ToolsRoute: typeof ToolsRoute
   CropSlugRoute: typeof CropSlugRoute
@@ -118,6 +176,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SystemRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pliss': {
+      id: '/pliss'
+      path: '/pliss'
+      fullPath: '/pliss'
+      preLoaderRoute: typeof PlissRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gallery': {
       id: '/gallery'
       path: '/gallery'
@@ -125,11 +190,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/flowingcartographies': {
+      id: '/flowingcartographies'
+      path: '/flowingcartographies'
+      fullPath: '/flowingcartographies'
+      preLoaderRoute: typeof FlowingcartographiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/fivecrops': {
+      id: '/fivecrops'
+      path: '/fivecrops'
+      fullPath: '/fivecrops'
+      preLoaderRoute: typeof FivecropsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dogtown': {
       id: '/dogtown'
       path: '/dogtown'
       fullPath: '/dogtown'
       preLoaderRoute: typeof DogtownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/credits': {
+      id: '/credits'
+      path: '/credits'
+      fullPath: '/credits'
+      preLoaderRoute: typeof CreditsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -151,8 +237,12 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CreditsRoute: CreditsRoute,
   DogtownRoute: DogtownRoute,
+  FivecropsRoute: FivecropsRoute,
+  FlowingcartographiesRoute: FlowingcartographiesRoute,
   GalleryRoute: GalleryRoute,
+  PlissRoute: PlissRoute,
   SystemRoute: SystemRoute,
   ToolsRoute: ToolsRoute,
   CropSlugRoute: CropSlugRoute,
@@ -160,3 +250,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
